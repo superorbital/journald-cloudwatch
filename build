@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+
+fpm -s dir \
+    -t deb \
+    -n journald2cloudwatch \
+    -d jq \
+    -d awscli \
+    --force \
+    --architecture "all" \
+    --license "MIT" \
+    --url "https://github.com/superorbital/journald2cloudwatch" \
+    --vendor "hello@superorbit.al" \
+    --maintainer "hello@superorbit.al" \
+    --description "Forward logs from journald to AWS Cloud Watch" \
+    --deb-no-default-config-files \
+    --config-files /lib/systemd/system/journald2cloudwatch.service \
+    --inputs MANIFEST \
+    --after-install scripts/after-install.sh \
+    --after-upgrade scripts/after-upgrade.sh
