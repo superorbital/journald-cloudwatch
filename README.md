@@ -3,7 +3,9 @@
 _Debian package to forward journald to cloud watch._
 
 It's shockingly difficult to send your Journald logs to Cloud Watch.  Solutions
-exist (see below), but I had trouble getting any of them to work correctly.
+exist ([1](https://github.com/saymedia/journald-cloudwatch-logs),
+[2](https://github.com/advantageous/systemd-cloud-watch)), but I had trouble
+getting any of them to work correctly.
 
 I finally found a script that worked
 ([juxt/rock](https://github.com/juxt/rock/tree/master/share/journald-cloud-watch-script)),
