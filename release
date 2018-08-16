@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+
+die() {
+  echo "Error: $1"
+  exit 2
+}
+
+command -v hub > /dev/null || die "Requires hub from https://github.com/github/hub"
+
+version="$(< VERSION)"
+version_string="v$version"
+deb="journald2cloudwatch_${version}_all.deb"
+
+[[ -f $deb ]] || die "Cannot find $deb.  Did you run the ./build script?"
+[[ -z "$(git status --porcelain)" ]] || die "Looks like you have uncommitted changes."
+
+if git tag -l | grep -qx "$version_string"; then
+  die "Version $version_string is already tagged."
+else
+  git tag -a "$version_string" -m "Tagging $version_string"
+  git push --tags
+fi
+
+hub release create -a "$deb" -t "$version_string"
