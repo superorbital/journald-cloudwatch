@@ -20,6 +20,7 @@ if git tag -l | grep -qx "$version_string"; then
   die "Version $version_string is already tagged."
 else
   git tag -a "$version_string" -m "Tagging $version_string"
+  git push
   git push --tags
 fi
 
