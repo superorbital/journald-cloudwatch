@@ -2,6 +2,13 @@
 
 Debian package to forward journald to cloud watch.  Heavily borrowed (stolen) from the [juxt/rock](https://github.com/juxt/rock/tree/master/share/journald-cloud-watch-script) project and made into a Debian/Ubuntu package.
 
+## Installing:
+
+~~~ console
+$ curl -sSLO https://github.com/superorbital/journald2cloudwatch/releases/download/v1.2.5/journald2cloudwatch_latest_all.deb
+$ dpkg install ./journald2cloudwatch_latest_all.deb
+~~~
+
 ### Todo:
 
 * [ ] Write service file
