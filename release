@@ -12,6 +12,7 @@ command -v hub > /dev/null || die "Requires hub from https://github.com/github/h
 version="$(< VERSION)"
 version_string="v$version"
 deb="journald2cloudwatch_${version}_all.deb"
+latest="journald2cloudwatch_latest_all.deb"
 
 [[ -f $deb ]] || die "Cannot find $deb.  Did you run the ./build script?"
 [[ -z "$(git status --porcelain)" ]] || die "Looks like you have uncommitted changes."
@@ -24,4 +25,6 @@ else
   git push --tags
 fi
 
-hub release create -a "$deb" -m "Release $version_string" "$version_string"
+cp "$deb" "$latest"
+
+hub release create -a "$deb" -a "$latest" -m "Release $version_string" "$version_string"
