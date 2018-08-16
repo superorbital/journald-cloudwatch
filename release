@@ -23,4 +23,4 @@ else
   git push --tags
 fi
 
-hub release create -a "$deb" -t "$version_string"
+hub release create -a "$deb" -m "Release $version_string" "$version_string"
