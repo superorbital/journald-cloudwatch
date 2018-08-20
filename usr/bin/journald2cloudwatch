@@ -7,12 +7,17 @@ AWS_REGION="${AWS_REGION:-$(curl -s http://169.254.169.254/latest/dynamic/instan
 LOG_GROUP_NAME="${LOG_GROUP_NAME:-journald}"
 LOG_STREAM_NAME="$(hostname)"
 
-AWS_CURSOR_FILE="/var/lib/journald-cloud-watch-script/aws-cursor"
-JOURNAL_CURSOR_FILE="/var/lib/journald-cloud-watch-script/journal-cursor"
-
-mkdir -p "/var/lib/journald-cloud-watch-script"
-
 BATCH_SIZE=50
+
+BASE="/var/lib/journald2cloudwatch"
+AWS_CURSOR_FILE="$BASE/aws-cursor"
+JOURNAL_CURSOR_FILE="$BASE/journal-cursor"
+
+mkdir -p "$BASE"
+
+create_log_group () {
+  aws logs create-log-group --region=$AWS_REGION --log-group-name=$LOG_GROUP_NAME || true
+}
 
 fetch_current_cursor () {
     aws logs describe-log-streams \
@@ -27,11 +32,6 @@ create_or_get_current_cursor () {
     if [[ $current ]]; then
         echo $current > $AWS_CURSOR_FILE
     else
-      set +e
-      aws logs create-log-group \
-          --region=$AWS_REGION \
-          --log-group-name=$LOG_GROUP_NAME
-      set -e
       aws logs create-log-stream \
           --region=$AWS_REGION \
           --log-group-name=$LOG_GROUP_NAME \
@@ -64,9 +64,7 @@ write_batch () {
         return 0
     fi
 
-    BATCH=$(echo "$rows" |\
-        format_row |\
-        jq -s .)
+    BATCH=$(echo "$rows" | format_row | jq -s .)
     if [[ $(cat $AWS_CURSOR_FILE) ]]; then
         sequence_token="--sequence-token=$(cat $AWS_CURSOR_FILE)"
     else
@@ -83,6 +81,7 @@ write_batch () {
 
 touch $AWS_CURSOR_FILE
 touch $JOURNAL_CURSOR_FILE
+create_log_group
 create_or_get_current_cursor
 while true; do
     write_batch
