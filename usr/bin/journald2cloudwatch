@@ -27,10 +27,15 @@ create_or_get_current_cursor () {
     if [[ $current ]]; then
         echo $current > $AWS_CURSOR_FILE
     else
-        aws logs create-log-stream \
-            --region=$AWS_REGION \
-            --log-group-name=$LOG_GROUP_NAME \
-            --log-stream-name=$LOG_STREAM_NAME
+      set +e
+      aws logs create-log-group \
+          --region=$AWS_REGION \
+          --log-group-name=$LOG_GROUP_NAME
+      set -e
+      aws logs create-log-stream \
+          --region=$AWS_REGION \
+          --log-group-name=$LOG_GROUP_NAME \
+          --log-stream-name=$LOG_STREAM_NAME
     fi
 }
 
