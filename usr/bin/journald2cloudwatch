@@ -5,7 +5,6 @@ set -Eeuo pipefail
 INSTANCE_ID="${INSTANCE_ID:-$(curl -s http://169.254.169.254/latest/meta-data/instance-id)}"
 AWS_REGION="${AWS_REGION:-$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')}"
 LOG_GROUP_NAME="${LOG_GROUP_NAME:-journald}"
-LOG_STREAM_NAME="$(hostname)"
 
 BATCH_SIZE=50
 
@@ -23,19 +22,19 @@ fetch_current_cursor () {
     aws logs describe-log-streams \
         --region="$AWS_REGION" \
         --log-group-name="$LOG_GROUP_NAME" \
-        --log-stream-name-prefix="$LOG_STREAM_NAME" |\
+        --log-stream-name-prefix="$(hostname)" |\
         jq -r ".logStreams[0].uploadSequenceToken // empty"
 }
 
 create_or_get_current_cursor () {
     current=$(fetch_current_cursor)
     if [[ $current ]]; then
-        echo $current > $AWS_CURSOR_FILE
+        echo "$current" > "$AWS_CURSOR_FILE"
     else
       aws logs create-log-stream \
-          --region=$AWS_REGION \
-          --log-group-name=$LOG_GROUP_NAME \
-          --log-stream-name=$LOG_STREAM_NAME
+          --region="$AWS_REGION" \
+          --log-group-name="$LOG_GROUP_NAME" \
+          --log-stream-name="$(hostname)"
     fi
 }
 
@@ -73,7 +72,7 @@ write_batch () {
     aws logs put-log-events \
         --region="$AWS_REGION" \
         --log-group-name="$LOG_GROUP_NAME" \
-        --log-stream-name="$LOG_STREAM_NAME" \
+        --log-stream-name="$(hostname)" \
         "$sequence_token" \
         --log-events="$BATCH" |\
         jq -r ".nextSequenceToken" > "$AWS_CURSOR_FILE"
